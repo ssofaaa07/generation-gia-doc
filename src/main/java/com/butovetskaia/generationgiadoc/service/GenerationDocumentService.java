@@ -3,7 +3,7 @@ package com.butovetskaia.generationgiadoc.service;
 import com.butovetskaia.generationgiadoc.enums.DirectionEducation;
 import com.butovetskaia.generationgiadoc.enums.Faculty;
 import com.butovetskaia.generationgiadoc.model.DocumentInfo;
-import com.butovetskaia.generationgiadoc.model.InfoStudent;
+import com.butovetskaia.generationgiadoc.model.StudentInfo;
 import com.butovetskaia.generationgiadoc.model.InputRequest;
 import com.butovetskaia.generationgiadoc.service.generation.DocumentGeneration;
 import lombok.RequiredArgsConstructor;
@@ -31,20 +31,29 @@ public class GenerationDocumentService {
 
     public ResponseEntity<Resource> getExcelTemplate() {
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attchment; filename=\"" + TEMPLATE_FILE_NAME + ".xlsx\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attchment; filename=\"" + "Данные о ВКР студентов.xlsx\"")
                 .header(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
                 .body(new ClassPathResource(TEMPLATE_FILE_NAME + ".xlsx"));
     }
 
-    public ResponseEntity<InputStreamResource> generate(InputRequest request) throws IOException {
-        List<InfoStudent> infoStudents = excelService.getStudentInfo(request.getFile());
+    public ResponseEntity<InputStreamResource> generate(InputRequest request) {
+        List<StudentInfo> infoStudents = excelService.getStudentInfo(request.getFile(), request.getSchedules());
         DocumentInfo info = DocumentInfo.builder()
                 .infoStudents(infoStudents)
                 .direction(request.getDirection())
+                .faculty(request.getFaculty())
+                .formEducation(request.getFormEducation())
+                .department(request.getDepartment())
+                .qualification(request.getQualification())
+                .schedules(request.getSchedules())
                 .chairpersonName(request.getChairperson())
-                .secretaryName(request.getSecretary()).build();
+                .secretaryName(request.getSecretary())
+                .commissionMembers(request.getCommissionMembers())
+                .chairpersonAppellateName(request.getChairpersonAppellate())
+                .commissionAppellateMembers(request.getCommissionAppellateMembers())
+                .declineNames(request.isDeclineNames()).build();
 
-        ByteArrayOutputStream zipOutputStream = DocumentGeneration.generation(info);
+        ByteArrayOutputStream zipOutputStream = DocumentGeneration.generateForProcessOfGia(info);
         ByteArrayInputStream zipInputStream = new ByteArrayInputStream(zipOutputStream.toByteArray());
         String encodedFileName = URLEncoder.encode("Документы ГИА.zip", StandardCharsets.UTF_8).replace("+", "%20");
         return ResponseEntity.ok()

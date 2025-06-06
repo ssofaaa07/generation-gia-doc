@@ -1,10 +1,10 @@
 package com.butovetskaia.generationgiadoc.service.generation;
 
-import com.aspose.cells.DateTime;
 import com.aspose.words.*;
 import com.butovetskaia.generationgiadoc.enums.Recommendation;
+import com.butovetskaia.generationgiadoc.model.DateInfo;
 import com.butovetskaia.generationgiadoc.model.DocumentInfo;
-import com.butovetskaia.generationgiadoc.model.InfoStudent;
+import com.butovetskaia.generationgiadoc.model.StudentInfo;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayOutputStream;
@@ -13,7 +13,7 @@ import java.io.InputStream;
 @Slf4j
 public class MarkListGeneration extends DocumentGeneration {
     @Override
-    public ByteArrayOutputStream generationDocument(DocumentInfo info, DateTime date) {
+    public ByteArrayOutputStream generationDocument(DocumentInfo info, DateInfo date) {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -29,7 +29,7 @@ public class MarkListGeneration extends DocumentGeneration {
             }
             int count = 0;
 
-            for (InfoStudent student : info.infoStudents().stream().filter(is -> is.getDateExam().equals(date)).toList()) {
+            for (StudentInfo student : info.infoStudents().stream().filter(is -> is.getDateExam().getDate().equals(date.getDate())).toList()) {
                 Row row = new Row(doc);
                 count++;
                 for (int i = 1; i < 16; i++) {
@@ -50,6 +50,8 @@ public class MarkListGeneration extends DocumentGeneration {
                                 para.appendChild(new Run(doc, student.getRecommendations().contains(Recommendation.IMPLEMENTATION_RECOMMENDATION) ? "+" : ""));
                         case 11 ->
                                 para.appendChild(new Run(doc, student.getRecommendations().contains(Recommendation.IMPLEMENTED) ? "+" : ""));
+                        case 12 -> para.appendChild(new Run(doc, Integer.toString(student.getMarkOne())));
+                        case 13 -> para.appendChild(new Run(doc, Integer.toString(student.getMarkTwo())));
                     }
                     cell.appendChild(para);
                     row.appendChild(cell);
@@ -63,7 +65,7 @@ public class MarkListGeneration extends DocumentGeneration {
             return outputStream;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("ggg");
+            throw new RuntimeException("Не удалось сгенерировать документ");
         }
     }
 }

@@ -15,9 +15,33 @@ java {
 
 repositories {
 	mavenCentral()
+
+	maven {
+		url = uri("https://raw.github.com/morpher-ru/morpher-ws3-java-client/mvn-repo")
+		metadataSources {
+			mavenPom()
+			artifact()
+		}
+		content {
+			includeGroup("ru.morpher")
+		}
+	}
 }
 
 dependencies {
+//	implementation fileTree(dir: 'lib', include: ['*.jar'])
+//	implementation files('lib/morpher-core-1.8.0.jar')
+//	implementation files('lib/morpher-engine-api-1.8.0.jar')
+//	implementation files('lib/combinatoricslib3-3.3.3.jar')
+//	implementation files('lib/logback-classic-1.4.11.jar')
+//	implementation files('lib/logback-core-1.4.11.jar')
+//	implementation files('lib/morpher-engine-impl-1.8.0.jar')
+//	implementation files('lib/morpher-language-handler-api-1.8.0.jar')
+//	implementation files('lib/morpher-transformation-engine-api-1.8.0.jar')
+//	implementation files('lib/protobuf-java-3.25.0.jar')
+//	implementation files('lib/slf4j-api-2.0.9.jar')
+
+
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
@@ -27,6 +51,9 @@ dependencies {
 	implementation 'com.luhuiguo:aspose-cells:23.1'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0'
+	implementation("ru.morpher:ws3.client:1.0-SNAPSHOT")
+//	implementation "com.github.morpher-ru:morpher-ws3-java-client:2.0.0"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

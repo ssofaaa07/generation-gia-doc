@@ -1,15 +1,17 @@
 package com.butovetskaia.generationgiadoc.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 public class InputRequest {
     MultipartFile file;
 
@@ -21,10 +23,19 @@ public class InputRequest {
 
     String formEducation;
 
-    InfoCommissionMember secretary;
+    String department;
 
-    InfoCommissionMember chairperson;
+    List<DateInfo> schedules;
 
-    List<InfoCommissionMember> commissionMembers;
+    CommissionMemberInfo secretary;
 
+    CommissionMemberInfo chairperson;
+
+    List<CommissionMemberInfo> commissionMembers;
+
+    CommissionMemberInfo chairpersonAppellate;
+
+    List<CommissionMemberInfo> commissionAppellateMembers;
+
+    boolean declineNames;
 }
