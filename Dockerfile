@@ -1,6 +1,6 @@
-# Используем официальный образ OpenJDK
-FROM eclipse-temurin:17-jdk-jamillion
-  
+# Используем официальный образ
+FROM eclipse-temurin:20-jdk-jammy
+
   # Рабочая директория
 WORKDIR /app
   
@@ -10,9 +10,9 @@ COPY gradle gradle
 COPY build.gradle .
 COPY settings.gradle .
 COPY src src
-  
+
   # Запускаем сборку
 RUN ./gradlew build --no-daemon
   
   # Команда для запуска
-CMD ["java", "-jar", "build/libs/your-app-name.jar"]
+CMD ["java", "-jar", "build/libs/generation-gia-doc-0.0.1-SNAPSHOT.jar"]
