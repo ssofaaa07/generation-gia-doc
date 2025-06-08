@@ -1,5 +1,5 @@
 # Используем официальный образ
-FROM eclipse-temurin:20-jdk-jammy
+FROM eclipse-temurin:21-jdk-jammy
 
   # Рабочая директория
 WORKDIR /app
