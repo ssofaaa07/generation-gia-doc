@@ -25,14 +25,14 @@ import java.util.List;
 public class GenerationDocumentController {
     private final GenerationDocumentService generationDocumentService;
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = {"http://localhost:3000", "https://generation-frontend-b7n9.onrender.com"})
     @GetMapping("/template")
     @Operation(summary = "Получение шаблона для заполнения информации по студентам")
     public ResponseEntity<Resource> getExcelTemplate() {
         return generationDocumentService.getExcelTemplate();
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = {"http://localhost:3000", "https://generation-frontend-b7n9.onrender.com"})
     @PostMapping(value = "/documents/generate", consumes = "multipart/form-data")
     @Operation(summary = "Генерация пакета документов, сопутствующих процессу ГИА")
     public ResponseEntity<InputStreamResource> generateDocument(
@@ -47,14 +47,14 @@ public class GenerationDocumentController {
         return generationDocumentService.generate(request);
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = {"http://localhost:3000", "https://generation-frontend-b7n9.onrender.com"})
     @GetMapping("/direction")
     @Operation(summary = "Направления обучения для выпадающего списка")
     public ResponseEntity<List<String>> getDirection() {
         return ResponseEntity.ok(generationDocumentService.getDirection());
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = {"http://localhost:3000", "https://generation-frontend-b7n9.onrender.com"})
     @GetMapping("/faculty")
     @Operation(summary = "Факультеты для выпадающего списка")
     public ResponseEntity<List<String>> getFaculty() {

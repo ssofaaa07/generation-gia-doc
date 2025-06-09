@@ -25,14 +25,14 @@ import java.io.IOException;
 public class ResultController {
     private final ResultService resultService;
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = {"http://localhost:3000", "https://generation-frontend-b7n9.onrender.com"})
     @GetMapping("/template")
     @Operation(summary = "Получение шаблона для заполнения информации о результатах проведения ГИА")
     public ResponseEntity<Resource> getExcelTemplate() {
         return resultService.getExcelTemplate();
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = {"http://localhost:3000", "https://generation-frontend-b7n9.onrender.com"})
     @PostMapping(value = "/documents/generate", consumes = "multipart/form-data")
     @Operation(summary = "Генерация документов о проведении ГИА для отчетности")
     public ResponseEntity<InputStreamResource> generateDocument(
