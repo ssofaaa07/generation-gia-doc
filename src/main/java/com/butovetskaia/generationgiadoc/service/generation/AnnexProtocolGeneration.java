@@ -3,7 +3,6 @@ package com.butovetskaia.generationgiadoc.service.generation;
 import com.aspose.words.Document;
 import com.aspose.words.FindReplaceOptions;
 import com.aspose.words.Paragraph;
-import com.aspose.words.Run;
 import com.butovetskaia.generationgiadoc.model.DateInfo;
 import com.butovetskaia.generationgiadoc.model.DocumentInfo;
 import com.butovetskaia.generationgiadoc.model.StudentInfo;
@@ -14,7 +13,6 @@ import ru.morpher.ws3.ClientBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;

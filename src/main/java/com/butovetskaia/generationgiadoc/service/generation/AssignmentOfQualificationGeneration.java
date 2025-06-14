@@ -1,5 +1,6 @@
 package com.butovetskaia.generationgiadoc.service.generation;
 
+import com.aspose.words.ControlChar;
 import com.aspose.words.Document;
 import com.aspose.words.FindReplaceOptions;
 import com.aspose.words.SaveFormat;
@@ -7,11 +8,20 @@ import com.butovetskaia.generationgiadoc.model.DateInfo;
 import com.butovetskaia.generationgiadoc.model.DocumentResultInfo;
 import com.butovetskaia.generationgiadoc.model.StudentResultInfo;
 import lombok.extern.slf4j.Slf4j;
+import ru.morpher.ws3.AccessDeniedException;
+import ru.morpher.ws3.ArgumentEmptyException;
 import ru.morpher.ws3.ClientBuilder;
+import ru.morpher.ws3.russian.ArgumentNotRussianException;
+import ru.morpher.ws3.russian.InvalidFlagsException;
+import ru.morpher.ws3.russian.NumeralsDeclensionNotSupportedException;
+import ru.morpher.ws3.russian.RussianClient;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.butovetskaia.generationgiadoc.service.generation.DocumentGeneration.getDateString;
@@ -27,7 +37,7 @@ public class AssignmentOfQualificationGeneration {
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream(DocumentGeneration.ASSIGNMENT_OF_QUALIFICATION_FILE_NAME + "-template.doc");
             Document doc = new Document(inputStream);
 
-            var morpher = info.declineNames() ? new ClientBuilder().useToken("6b9f45d6-5443-4c13-b4ea-c0e8d5248b72").build().russian() : null;
+            RussianClient morpher = info.declineNames() ? new ClientBuilder().useToken("6b9f45d6-5443-4c13-b4ea-c0e8d5248b72").build().russian() : null;
 
             doc.getRange().replace("{{count}}", String.valueOf(info.numberOfProtocol()), new FindReplaceOptions());
             doc.getRange().replace("{{date}}", getDateString(date.getDate()), new FindReplaceOptions());
@@ -44,39 +54,31 @@ public class AssignmentOfQualificationGeneration {
             var countStudents = info.infoStudents().size();
             doc.getRange().replace("{{count_students}}", String.valueOf(countStudents), new FindReplaceOptions());
 
-            var redSortedStudents = info.infoStudents().stream()
+            var redStudents = info.infoStudents().stream()
                     .filter(StudentResultInfo::isRed)
                     .sorted(Comparator.comparing(StudentResultInfo::getName))
                     .toList();
 
-            String studentList = redSortedStudents.stream()
-                    .map(student -> info.declineNames()
-//                            ? Objects.requireNonNull(morpher).declension(student.getName()).dative
-                            ? ""
-                            : student.getName())
-                    .collect(Collectors.joining(", \u000B"));
-
-            if (!studentList.isEmpty()) {
-                studentList += ".";
-            }
-            doc.getRange().replace("{{red_student_name}}", studentList, new FindReplaceOptions());
-
-            var sortedStudents = info.infoStudents().stream()
+            var regularStudents = info.infoStudents().stream()
                     .filter(it -> !it.isRed())
                     .sorted(Comparator.comparing(StudentResultInfo::getName))
                     .toList();
 
-            studentList = sortedStudents.stream()
-                    .map(student -> info.declineNames()
-//                            ? Objects.requireNonNull(morpher).declension(student.getName()).dative
-                            ? ""
-                            : student.getName())
-                    .collect(Collectors.joining(", \u000B"));
+            // Формируем полный список студентов с правильной пунктуацией
+            StringBuilder studentsBuilder = new StringBuilder();
 
-            if (!studentList.isEmpty()) {
-                studentList += ".";
+            if (!redStudents.isEmpty()) {
+                studentsBuilder.append("дипломы с отличием" + ControlChar.LINE_BREAK_CHAR)
+                        .append(formatStudentList(redStudents, info.declineNames(), morpher, false))
+                        .append(ControlChar.LINE_BREAK_CHAR + "" + ControlChar.LINE_BREAK_CHAR + "дипломы" + ControlChar.LINE_BREAK_CHAR);
+            } else {
+                studentsBuilder.append("дипломы" + ControlChar.LINE_BREAK_CHAR);
             }
-            doc.getRange().replace("{{student_name}}", studentList, new FindReplaceOptions());
+
+            studentsBuilder.append(formatStudentList(regularStudents, info.declineNames(), morpher, true));
+
+            // Заменяем оба плейсхолдера одним сформированным текстом
+            doc.getRange().replace("{{student_name}}", studentsBuilder.toString(), new FindReplaceOptions());
 
             doc.save(outputStream, SaveFormat.DOCX);
             log.info("Документ успешно создан");
@@ -85,6 +87,29 @@ public class AssignmentOfQualificationGeneration {
             e.printStackTrace();
             throw new RuntimeException("Не удалось сгенерировать документ");
         }
+    }
+
+    private String formatStudentList(List<StudentResultInfo> students, boolean declineNames,
+                                     RussianClient morpher, boolean addDot) {
+        if (students.isEmpty()) {
+            return "";
+        }
+
+        String list = students.stream()
+                .map(student -> {
+                    try {
+                        return declineNames
+                                ? Objects.requireNonNull(morpher).declension(student.getName()).dative
+                                : student.getName().trim();
+                    } catch (IOException | AccessDeniedException | ArgumentEmptyException |
+                             InvalidFlagsException | ArgumentNotRussianException |
+                             NumeralsDeclensionNotSupportedException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.joining(", " + ControlChar.LINE_BREAK_CHAR));
+
+        return list + (addDot ? "." : ",");
     }
 }
 

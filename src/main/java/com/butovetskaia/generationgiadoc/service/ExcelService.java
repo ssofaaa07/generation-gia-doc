@@ -98,7 +98,7 @@ public class ExcelService {
         for (int row = 2; row < cells.getMaxDataRow() + 1; row++) {
             if (isNotBlank(cells.get(row, 2).getStringValue().trim())) {
                 StudentResultInfo info = StudentResultInfo.builder()
-                        .name(cells.get(row, 1).getStringValue().trim())
+                        .name(cells.get(row, 1).getStringValue().replaceAll("[^а-яА-Яa-zA-Z]+$", "").trim())
                         .themeName(cells.get(row, 2).getStringValue().trim())
                         .supervisorName(cells.get(row, 3).getStringValue().trim())
                         .mark(cells.get(row, 4).getIntValue())
