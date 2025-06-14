@@ -32,7 +32,7 @@ public class ResultService {
     }
 
     public ResponseEntity<InputStreamResource> generate(InputResultRequest request) {
-        var info = excelService.getDocumentInfo(request.getFile(), request.getSchedule());
+        var info = excelService.getDocumentInfo(request.getFile(), request.getSchedule(), request.isDeclineNames());
 
         ByteArrayOutputStream zipOutputStream = DocumentGeneration.generateForSummingUp(info);
         ByteArrayInputStream zipInputStream = new ByteArrayInputStream(zipOutputStream.toByteArray());

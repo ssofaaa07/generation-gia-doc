@@ -111,7 +111,7 @@ public class ExcelService {
         return infoStudents;
     }
 
-    public DocumentResultInfo getDocumentInfo(MultipartFile file, DateInfo dateCommission) {
+    public DocumentResultInfo getDocumentInfo(MultipartFile file, DateInfo dateCommission, boolean isDeclineNames) {
         try {
             var builder = DocumentResultInfo.builder();
             Workbook workbook = new Workbook(file.getInputStream());
@@ -120,6 +120,7 @@ public class ExcelService {
             Cells cells = worksheet.getCells();
 
             builder.infoStudents(readStudentResultInfo(cells));
+            builder.declineNames(isDeclineNames);
 
             worksheet = workbook.getWorksheets().get(1);
 
