@@ -3,6 +3,7 @@ package com.butovetskaia.generationgiadoc.service.generation;
 import com.butovetskaia.generationgiadoc.model.DateInfo;
 import com.butovetskaia.generationgiadoc.model.DocumentInfo;
 import com.butovetskaia.generationgiadoc.model.DocumentResultInfo;
+import com.butovetskaia.generationgiadoc.model.StudentInfo;
 import com.butovetskaia.generationgiadoc.service.ExcelService;
 import lombok.RequiredArgsConstructor;
 
@@ -53,6 +54,13 @@ public abstract class DocumentGeneration {
                 zipOut.closeEntry();
 
                 count++;
+
+                for (String studentName : info.infoStudents().stream().filter(it -> it.getDateExam().getDate().equals(date.getDate())).map(StudentInfo::getName).toList()) {
+                    var secondName = studentName.split(" ")[0];
+                    String folderEntry = "Студенты " + getDateString(date.getDate()) + "/" + secondName + "/";
+                    zipOut.putNextEntry(new ZipEntry(folderEntry));
+                    zipOut.closeEntry();
+                }
             }
 
             ByteArrayOutputStream excelTemplateForResult = excelService.getTemplateForResult(info);

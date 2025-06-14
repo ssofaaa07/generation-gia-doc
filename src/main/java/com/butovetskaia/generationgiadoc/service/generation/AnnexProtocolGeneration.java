@@ -15,7 +15,10 @@ import ru.morpher.ws3.ClientBuilder;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Slf4j
 @AllArgsConstructor
@@ -39,6 +42,7 @@ public class AnnexProtocolGeneration extends DocumentGeneration {
 
             Document doc = new Document();
 
+            // Фильтруем студентов по дате
             List<StudentInfo> filteredStudents = info.infoStudents().stream()
                     .filter(is -> is.getDateExam().equals(date))
                     .toList();
@@ -46,39 +50,44 @@ public class AnnexProtocolGeneration extends DocumentGeneration {
             for (int i = 0; i < filteredStudents.size(); i++) {
                 StudentInfo student = filteredStudents.get(i);
 
-                // Клонируем шаблон
-                Document tempDoc = template.deepClone();
-                replacePlaceholders(tempDoc, student, info.declineNames());
+                // Клонируем и заполняем шаблон для текущего студента
+                Document studentDoc = template.deepClone();
+                replacePlaceholders(studentDoc, student, info.declineNames());
 
-                // Получаем все параграфы и преобразуем в List вручную
-                List<Paragraph> paragraphs = new ArrayList<>();
-                for (Paragraph p : tempDoc.getFirstSection().getBody().getParagraphs()) {
-                    paragraphs.add(p);
-                }
-
-                // Копируем оставшиеся параграфы в основной документ
-                for (Paragraph sourceParagraph : paragraphs) {
-                    Paragraph importedParagraph = (Paragraph) doc.importNode(sourceParagraph, true);
-                    doc.getLastSection().getBody().appendChild(importedParagraph);
-                }
-
-                // Добавляем разрыв страницы (кроме последнего студента)
-                if (i < filteredStudents.size() - 1) {
-                    Paragraph pageBreak = new Paragraph(doc);
-                    pageBreak.appendChild(new Run(doc, "\f")); // Форсированный разрыв страницы
-                    doc.getLastSection().getBody().appendChild(pageBreak);
-                }
+                // Получаем все параграфы и очищаем от пустых в начале/конце
+                List<Paragraph> paragraphs = Arrays.stream(studentDoc.getFirstSection().getBody().getParagraphs().toArray())
+                        .map(p -> (Paragraph)p)
+                        .collect(Collectors.toList());
 
                 // Удаляем пустые параграфы в начале
-                while (!paragraphs.isEmpty() && paragraphs.getFirst().getText().trim().isEmpty()) {
-                    paragraphs.removeFirst();
+                while (!paragraphs.isEmpty() && paragraphs.get(0).getText().trim().isEmpty()) {
+                    paragraphs.remove(0);
                 }
 
                 // Удаляем пустые параграфы в конце
-                while (!paragraphs.isEmpty() && paragraphs.getLast().getText().trim().isEmpty()) {
-                    paragraphs.removeLast();
+                while (!paragraphs.isEmpty() && paragraphs.get(paragraphs.size()-1).getText().trim().isEmpty()) {
+                    paragraphs.remove(paragraphs.size()-1);
                 }
 
+                // Для всех кроме первого студента добавляем разрыв страницы
+                if (i > 0) {
+                    Paragraph first = (Paragraph)doc.importNode(paragraphs.get(0), true);
+                    first.getParagraphFormat().setPageBreakBefore(true);
+                    doc.getLastSection().getBody().appendChild(first);
+
+                    // Добавляем остальные параграфы
+                    for (int j = 1; j < paragraphs.size(); j++) {
+                        doc.getLastSection().getBody().appendChild(
+                                doc.importNode(paragraphs.get(j), true));
+                    }
+                } else {
+                    // Для первого студента просто добавляем все параграфы
+                    for (Paragraph paragraph : paragraphs) {
+                        doc.getLastSection().getBody().appendChild(
+                                doc.importNode(paragraph, true));
+                    }
+                    doc.getFirstSection().getBody().getFirstChild().remove();
+                }
             }
             doc.save(outputStream, com.aspose.words.SaveFormat.DOCX);
             log.info("Документ успешно создан");
