@@ -220,7 +220,7 @@ public class ExcelService {
             col++;
         }
 
-        builder.commissionAppellateMembers(members);
+        builder.commissionAppellateMembers(appellateMembers);
 
         row = ++roww;
         row++;

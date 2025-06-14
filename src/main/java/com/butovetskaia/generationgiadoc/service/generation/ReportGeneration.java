@@ -1,6 +1,7 @@
 package com.butovetskaia.generationgiadoc.service.generation;
 
 import com.aspose.words.*;
+import com.butovetskaia.generationgiadoc.model.CommissionMemberInfo;
 import com.butovetskaia.generationgiadoc.model.DocumentResultInfo;
 import com.butovetskaia.generationgiadoc.model.StudentResultInfo;
 import lombok.AllArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.List;
 
 import static com.butovetskaia.generationgiadoc.service.generation.DocumentGeneration.getDateString;
 import static com.butovetskaia.generationgiadoc.service.generation.DocumentGeneration.getShortName;
@@ -40,14 +42,10 @@ public class ReportGeneration {
             doc.getRange().replace("{{date_of_commission_members}}", getDateString(info.commissionMembers().getFirst().getOrderDate()), new FindReplaceOptions());
             doc.getRange().replace("{{number_of_commission_members}}", String.valueOf(info.commissionMembers().getFirst().getOrderNumber()), new FindReplaceOptions());
 
-            //TODO вывод членов комиссии
-
             doc.getRange().replace("{{date_of_appellate_chairperson}}", getDateString(info.chairpersonAppellateName().getOrderDate()), new FindReplaceOptions());
             doc.getRange().replace("{{number_of_appellate_chairperson}}", String.valueOf(info.chairpersonAppellateName().getOrderNumber()), new FindReplaceOptions());
             doc.getRange().replace("{{appellate_chairperson_name}}", getInverseName(info.chairpersonAppellateName().getMemberName()), new FindReplaceOptions());
             doc.getRange().replace("{{appellate_chairperson_post}}", info.chairpersonAppellateName().getMemberPost(), new FindReplaceOptions());
-
-            //TODO вывод членов appellate комиссии
 
             doc.getRange().replace("{{date_of_secretary}}", getDateString(info.secretaryName().getOrderDate()), new FindReplaceOptions());
             doc.getRange().replace("{{number_of_secretary}}", String.valueOf(info.secretaryName().getOrderNumber()), new FindReplaceOptions());
@@ -130,6 +128,9 @@ public class ReportGeneration {
             doc.getRange().replace("{{nud}}", String.valueOf(nud), new FindReplaceOptions());
             doc.getRange().replace("{{nudp}}", String.valueOf(Math.round(nud / all * 100)), new FindReplaceOptions());
 
+            doc.getRange().replace("{{commission_members}}", generateMembers(doc, info.commissionMembers()), new FindReplaceOptions());
+            doc.getRange().replace("{{appellate_members}}", generateMembers(doc, info.commissionAppellateMembers()), new FindReplaceOptions());
+
             doc.save(outputStream, SaveFormat.DOCX);
             log.info("Документ успешно создан");
             return outputStream;
@@ -155,6 +156,28 @@ public class ReportGeneration {
         } else {
             return parts[1] + " " + parts[2] + " " + parts[0];
         }
+    }
+
+    private String generateMembers(Document doc, List<CommissionMemberInfo> members) throws Exception {
+        // Получаем диапазон для замены
+        Range range = doc.getRange();
+
+        // Формируем текст для апелляционной комиссии
+        StringBuilder membersText = new StringBuilder();
+        boolean flag = false;
+
+        for (var member : members) {
+            if (member.equals(members.getLast())) {
+                flag = true;
+            }
+            membersText.append(ControlChar.TAB_CHAR + "- ")
+                    .append(member.getMemberName())
+                    .append(", ")
+                    .append(member.getMemberPost())
+                    .append(flag ? "." : ";" + ControlChar.LINE_BREAK_CHAR);
+        }
+
+        return membersText.toString();
     }
 
     private String getMonth(int month) {
