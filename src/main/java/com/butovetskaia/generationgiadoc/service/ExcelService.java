@@ -62,8 +62,8 @@ public class ExcelService {
                         .supervisorMark(cells.get(row, 4).getStringValue().trim())
                         .themeType(themeType)
                         .recommendations(recommendations)
-                        .markOne(cells.get(row, 11).getIntValue())
-                        .markTwo(cells.get(row, 12).getIntValue()).build();
+                        .markOne(cells.get(row, 11).getStringValue())
+                        .markTwo(cells.get(row, 12).getStringValue()).build();
                 infoStudents.add(info);
             }
         }

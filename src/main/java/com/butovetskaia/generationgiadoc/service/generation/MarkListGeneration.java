@@ -50,8 +50,8 @@ public class MarkListGeneration extends DocumentGeneration {
                                 para.appendChild(new Run(doc, student.getRecommendations().contains(Recommendation.IMPLEMENTATION_RECOMMENDATION) ? "+" : ""));
                         case 11 ->
                                 para.appendChild(new Run(doc, student.getRecommendations().contains(Recommendation.IMPLEMENTED) ? "+" : ""));
-                        case 12 -> para.appendChild(new Run(doc, Integer.toString(student.getMarkOne())));
-                        case 13 -> para.appendChild(new Run(doc, Integer.toString(student.getMarkTwo())));
+                        case 12 -> para.appendChild(new Run(doc, student.getMarkOne()));
+                        case 13 -> para.appendChild(new Run(doc, student.getMarkTwo()));
                     }
                     cell.appendChild(para);
                     row.appendChild(cell);

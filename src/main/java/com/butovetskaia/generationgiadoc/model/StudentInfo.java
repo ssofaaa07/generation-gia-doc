@@ -17,6 +17,6 @@ public class StudentInfo {
     String supervisorMark;
     Theme themeType;
     List<Recommendation> recommendations;
-    int markOne;
-    int markTwo;
+    String markOne;
+    String markTwo;
 }
